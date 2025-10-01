@@ -23,7 +23,7 @@
         menu.classList.remove('open');
       }
     }));
-    // Reset state on resize
+    // Reset on resize
     window.addEventListener('resize', () => {
       if (window.innerWidth > 600) {
         menu.classList.remove('open');
@@ -47,19 +47,36 @@
     themeToggle.textContent = (pref === 'dark') ? '🌞' : '🌙';
   }
 
-  // Back to top
+  // Back to top + header shadow + scroll progress
   const backToTop = $('#backToTop');
+  const header = $('.site-header');
+  const progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress';
+  document.body.appendChild(progressBar);
+
+  function updateScrollUI(){
+    const y = window.scrollY;
+    if (header){
+      if (y > 6) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+    }
+    if (backToTop){
+      if (y > 500) backToTop.classList.add('show'); else backToTop.classList.remove('show');
+    }
+    // progress
+    const doc = document.documentElement;
+    const h = doc.scrollHeight - window.innerHeight;
+    const pct = h > 0 ? Math.min(100, Math.max(0, (y / h) * 100)) : 0;
+    progressBar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateScrollUI, { passive:true });
+  window.addEventListener('resize', updateScrollUI);
+  updateScrollUI();
+
   if (backToTop){
-    const onScroll = () => {
-      if (window.scrollY > 500) backToTop.classList.add('show');
-      else backToTop.classList.remove('show');
-    };
-    window.addEventListener('scroll', onScroll, { passive:true });
     backToTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
-    onScroll();
   }
 
-  // Typed words on homepage (reduce motion friendly)
+  // Typed words on homepage
   const typedEl = $('#typedWords');
   if (typedEl){
     const words = [
@@ -89,7 +106,7 @@
     }
   }
 
-  // Testimonials slider with smooth height transitions
+  // Testimonials slider (smooth height + pause on hover)
   const slider = $('#testimonialSlider');
   if (slider){
     const slidesWrap = $('.slides', slider);
@@ -103,7 +120,6 @@
       if (slidesWrap) slidesWrap.style.height = slides[n].offsetHeight + 'px';
     };
 
-    // Init height
     const initHeight = () => { if (slidesWrap) slidesWrap.style.height = slides[idx].offsetHeight + 'px'; };
     window.addEventListener('load', initHeight);
     initHeight();
@@ -112,16 +128,52 @@
     const nextBtn = $('[data-next]', slider);
     prevBtn.addEventListener('click', () => { idx = (idx-1+slides.length)%slides.length; show(idx); });
     nextBtn.addEventListener('click', () => { idx = (idx+1)%slides.length; show(idx); });
-    if (!reduceMotion) setInterval(() => { idx = (idx+1)%slides.length; show(idx); }, 6000);
+
+    let autoTimer = null;
+    const startAuto = () => { if (!reduceMotion) autoTimer = setInterval(() => { idx = (idx+1)%slides.length; show(idx); }, 6000); };
+    const stopAuto = () => { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } };
+    startAuto();
+    slider.addEventListener('mouseenter', stopAuto);
+    slider.addEventListener('mouseleave', startAuto);
+    window.addEventListener('blur', stopAuto);
+    window.addEventListener('focus', startAuto);
     window.addEventListener('resize', initHeight);
   }
 
-  // Subjects filter
+  // Subjects filter (animated show/hide)
   const subjectGrid = $('.subject-grid');
   if (subjectGrid){
+    // prepare cards for animation
+    $$('.subject-card', subjectGrid).forEach(card => card.classList.add('fade-toggle'));
+
     const yearRadios = $$('input[name="year-filter"]');
     const onlineChk = $('input[name="mode-online"]');
     const faceChk = $('input[name="mode-face"]');
+
+    function showCard(card){
+      if (!card.classList.contains('hidden')) {
+        // ensure fully shown
+        card.classList.remove('hide');
+        return;
+      }
+      card.classList.remove('hidden');
+      card.style.display = '';
+      // next frame to animate in
+      requestAnimationFrame(() => card.classList.remove('hide'));
+    }
+
+    function hideCard(card){
+      if (card.classList.contains('hidden')) return;
+      card.classList.add('hide');
+      const onEnd = (e) => {
+        if (e.propertyName !== 'opacity') return;
+        card.style.display = 'none';
+        card.classList.add('hidden');
+        card.removeEventListener('transitionend', onEnd);
+      };
+      card.addEventListener('transitionend', onEnd);
+    }
+
     function applyFilters(){
       const year = (yearRadios.find(r=>r.checked)||{}).value || 'all';
       const online = onlineChk.checked;
@@ -129,7 +181,8 @@
       $$('.subject-card', subjectGrid).forEach(card => {
         const acceptsYear = card.dataset.year === 'both' || card.dataset.year === year || year === 'all';
         const acceptsMode = (online && card.dataset.online === 'true') || (face && card.dataset.face === 'true');
-        card.style.display = (acceptsYear && acceptsMode) ? '' : 'none';
+        const shouldShow = acceptsYear && acceptsMode;
+        shouldShow ? showCard(card) : hideCard(card);
       });
     }
     [...yearRadios, onlineChk, faceChk].forEach(el => el && el.addEventListener('change', applyFilters));
@@ -268,7 +321,7 @@
     hero.addEventListener('mouseleave', () => { heroArt.style.transform = 'none'; });
   }
 
-  // Scroll reveal (auto-applied to common elements, can also add .reveal manually in HTML)
+  // Scroll reveal (auto-applied)
   function addRevealList(selector, effect, offset=0){
     $$(selector).forEach((el, i) => {
       if (!el.classList.contains('reveal')) el.classList.add('reveal');
@@ -288,7 +341,6 @@
   $$('.hero-copy > *').forEach((el, i) => { el.classList.add('reveal','fade-right'); el.style.setProperty('--d', i.toString()); });
 
   if (reduceMotion){
-    // If user prefers reduced motion, show all immediately
     $$('.reveal').forEach(el => el.classList.add('in'));
   } else {
     const io = new IntersectionObserver((entries) => {
@@ -298,6 +350,50 @@
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
     $$('.reveal').forEach(el => io.observe(el));
+  }
+
+  // Smooth anchor scrolling for in-page links (no page transition)
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    if (href.length <= 1) return;
+    const target = document.getElementById(href.slice(1));
+    if (!target) return;
+    // same page anchor
+    e.preventDefault();
+    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    history.pushState(null, '', href);
+  });
+
+  // Page transition fade between internal pages
+  if (!reduceMotion){
+    const overlay = document.createElement('div');
+    overlay.className = 'page-overlay';
+    document.body.appendChild(overlay);
+
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      // Skip if modified click or special cases
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target === '_blank' || a.hasAttribute('download') || a.dataset.noTransition !== undefined) return;
+      if (/^(mailto:|tel:)/i.test(href)) return;
+
+      const url = new URL(a.href, location.href);
+      // Skip external
+      if (url.origin !== location.origin) return;
+      // Skip hash-only links (handled above)
+      if (url.pathname === location.pathname && url.hash) return;
+
+      e.preventDefault();
+      overlay.classList.add('show');
+      setTimeout(() => { location.href = url.href; }, 200);
+    });
+
+    // Remove overlay if coming from BFCache or fast nav
+    window.addEventListener('pageshow', () => overlay.classList.remove('show'));
   }
 
 })();

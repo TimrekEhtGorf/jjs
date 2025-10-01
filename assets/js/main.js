@@ -143,22 +143,18 @@
   // Subjects filter (animated show/hide)
   const subjectGrid = $('.subject-grid');
   if (subjectGrid){
-    // prepare cards for animation
     $$('.subject-card', subjectGrid).forEach(card => card.classList.add('fade-toggle'));
-
     const yearRadios = $$('input[name="year-filter"]');
     const onlineChk = $('input[name="mode-online"]');
     const faceChk = $('input[name="mode-face"]');
 
     function showCard(card){
       if (!card.classList.contains('hidden')) {
-        // ensure fully shown
         card.classList.remove('hide');
         return;
       }
       card.classList.remove('hidden');
       card.style.display = '';
-      // next frame to animate in
       requestAnimationFrame(() => card.classList.remove('hide'));
     }
 
@@ -189,37 +185,124 @@
     applyFilters();
   }
 
-  // Tutors modal
+  // Tutors modal + smooth FLIP transition
   const tutorGrid = $('.tutor-grid');
   const modal = $('#tutorModal');
+  let lastCard = null;
   if (tutorGrid && modal){
     const modalImg = $('#modalImg');
     const modalName = $('#modalName');
     const modalSubjects = $('#modalSubjects');
     const modalBio = $('#modalBio');
-    tutorGrid.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-profile]');
-      if (!btn) return;
-      const card = e.target.closest('.tutor-card');
+
+    function openWithAnimation(card){
+      const cardImg = card.querySelector('img');
+      if (!cardImg) return;
       const data = JSON.parse(card.getAttribute('data-tutor'));
       modalImg.src = data.image || '';
       modalImg.alt = 'Photo of ' + data.name;
       modalName.textContent = data.name;
       modalSubjects.textContent = data.subjects;
       modalBio.textContent = data.bio;
+
+      // Open modal
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+
+      if (reduceMotion) return;
+
+      // FLIP clone
+      const from = cardImg.getBoundingClientRect();
+      // Ensure modal layout applied
+      requestAnimationFrame(() => {
+        const to = modalImg.getBoundingClientRect();
+
+        // Hide target while animating
+        modalImg.style.opacity = '0';
+
+        const clone = cardImg.cloneNode(true);
+        clone.className = 'anim-clone';
+        clone.style.left = from.left + 'px';
+        clone.style.top = from.top + 'px';
+        clone.style.width = from.width + 'px';
+        clone.style.height = from.height + 'px';
+        clone.style.transform = 'translate(0,0) scale(1)';
+        clone.style.transition = 'transform 420ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease';
+        document.body.appendChild(clone);
+
+        const dx = to.left - from.left;
+        const dy = to.top - from.top;
+        const sx = to.width / from.width;
+        const sy = to.height / from.height;
+
+        requestAnimationFrame(() => {
+          clone.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+        });
+
+        const onEnd = () => {
+          clone.removeEventListener('transitionend', onEnd);
+          clone.remove();
+          modalImg.style.opacity = '';
+        };
+        clone.addEventListener('transitionend', onEnd, { once:true });
+      });
+    }
+
+    function closeWithAnimation(){
+      if (!modal.classList.contains('active')) return;
+      const modalImg = $('#modalImg');
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+
+      if (reduceMotion || !lastCard) return;
+
+      const cardImg = lastCard.querySelector('img');
+      if (!cardImg) return;
+
+      const from = modalImg.getBoundingClientRect();
+      const to = cardImg.getBoundingClientRect();
+
+      const clone = modalImg.cloneNode(true);
+      clone.className = 'anim-clone';
+      clone.style.left = from.left + 'px';
+      clone.style.top = from.top + 'px';
+      clone.style.width = from.width + 'px';
+      clone.style.height = from.height + 'px';
+      clone.style.transform = 'translate(0,0) scale(1)';
+      clone.style.transition = 'transform 360ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease';
+      document.body.appendChild(clone);
+
+      const dx = to.left - from.left;
+      const dy = to.top - from.top;
+      const sx = to.width / from.width;
+      const sy = to.height / from.height;
+
+      requestAnimationFrame(() => {
+        clone.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+        clone.style.opacity = '0.98';
+      });
+
+      clone.addEventListener('transitionend', () => clone.remove(), { once:true });
+    }
+
+    tutorGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-profile]');
+      if (!btn) return;
+      const card = e.target.closest('.tutor-card');
+      lastCard = card;
+      openWithAnimation(card);
     });
+
     modal.addEventListener('click', (e) => {
       if (e.target.hasAttribute('data-close') || e.target.classList.contains('modal-close')){
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
+        closeWithAnimation();
       }
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modal.classList.contains('active')){
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
+        closeWithAnimation();
       }
     });
   }
@@ -256,7 +339,6 @@
           <p class="muted">Tip: Break each hour into 45 mins focused study + 15 mins review.</p>
         </div>
       `;
-      // Trigger reveal immediately for newly injected content
       if (!reduceMotion) requestAnimationFrame(() => document.querySelector('.plan-table')?.closest('.reveal')?.classList.add('in'));
     });
   }
@@ -270,7 +352,6 @@
       btn.style.setProperty('--rx', x + 'px');
       btn.style.setProperty('--ry', y + 'px');
       btn.classList.remove('rippling');
-      // restart animation
       void btn.offsetWidth; 
       btn.classList.add('rippling');
       setTimeout(() => btn.classList.remove('rippling'), 650);
@@ -302,10 +383,10 @@
     });
   }
 
-  // Hero parallax
+  // Hero parallax (moves the atom)
   const hero = $('.hero');
-  const heroArt = $('.hero-art');
-  if (hero && heroArt && !reduceMotion && window.matchMedia('(pointer:fine)').matches){
+  const atom = $('.atom');
+  if (hero && atom && !reduceMotion && window.matchMedia('(pointer:fine)').matches){
     let raf;
     hero.addEventListener('mousemove', (e) => {
       const r = hero.getBoundingClientRect();
@@ -315,10 +396,10 @@
       raf = requestAnimationFrame(() => {
         const tx = mx * 20; // px
         const ty = my * 12; // px
-        heroArt.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+        atom.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
       });
     });
-    hero.addEventListener('mouseleave', () => { heroArt.style.transform = 'none'; });
+    hero.addEventListener('mouseleave', () => { atom.style.transform = 'none'; });
   }
 
   // Scroll reveal (auto-applied)
@@ -337,7 +418,6 @@
   addRevealList('.resource-list li', '', 0);
   addRevealList('.contact-form .form-row', 'blur-in', 0);
   addRevealList('.cta-inner', 'zoom-in', 0);
-  // Hero copy children
   $$('.hero-copy > *').forEach((el, i) => { el.classList.add('reveal','fade-right'); el.style.setProperty('--d', i.toString()); });
 
   if (reduceMotion){
@@ -352,7 +432,7 @@
     $$('.reveal').forEach(el => io.observe(el));
   }
 
-  // Smooth anchor scrolling for in-page links (no page transition)
+  // Smooth anchor scrolling for in-page links
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
     if (!a) return;
@@ -360,7 +440,6 @@
     if (href.length <= 1) return;
     const target = document.getElementById(href.slice(1));
     if (!target) return;
-    // same page anchor
     e.preventDefault();
     target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
     history.pushState(null, '', href);
@@ -376,15 +455,12 @@
       const a = e.target.closest('a[href]');
       if (!a) return;
       const href = a.getAttribute('href');
-      // Skip if modified click or special cases
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       if (a.target === '_blank' || a.hasAttribute('download') || a.dataset.noTransition !== undefined) return;
       if (/^(mailto:|tel:)/i.test(href)) return;
 
       const url = new URL(a.href, location.href);
-      // Skip external
       if (url.origin !== location.origin) return;
-      // Skip hash-only links (handled above)
       if (url.pathname === location.pathname && url.hash) return;
 
       e.preventDefault();
@@ -392,7 +468,6 @@
       setTimeout(() => { location.href = url.href; }, 200);
     });
 
-    // Remove overlay if coming from BFCache or fast nav
     window.addEventListener('pageshow', () => overlay.classList.remove('show'));
   }
 

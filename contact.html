@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact | Jason's Tutoring</title>
+  <meta name="description" content="Contact Jason's Tutoring for NSW HSC Year 11–12 support. Online and face-to-face sessions available." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Jason's Tutoring</a>
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="primary-menu">☰</button>
+        <ul id="primary-menu" class="menu">
+          <li><a href="index.html" data-nav>Home</a></li>
+          <li><a href="subjects.html" data-nav>Subjects</a></li>
+          <li><a href="tutors.html" data-nav>Tutors</a></li>
+          <li><a href="resources.html" data-nav>Resources</a></li>
+          <li><a href="contact.html" class="btn btn-primary" data-nav>Contact</a></li>
+        </ul>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-header">
+      <h1>Contact us</h1>
+      <p>We typically reply within one business day.</p>
+    </section>
+
+    <section class="grid grid-2 gap-24">
+      <article class="card">
+        <h2>Send a message</h2>
+
+        <!-- Replace INSERT EMAIL HERE with your email. FormSubmit will send the enquiry to you. -->
+        <form class="contact-form" action="https://formsubmit.co/INSERT EMAIL HERE" method="POST">
+          <!-- FormSubmit options -->
+          <input type="hidden" name="_subject" value="New enquiry from Jason's Tutoring website">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+          <!-- To redirect after submission, set an absolute URL:
+               <input type="hidden" name="_next" value="https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO/contact.html?sent=1"> -->
+
+          <div class="form-row">
+            <label for="name">Full name</label>
+            <input id="name" name="name" type="text" placeholder="Your name" required>
+          </div>
+          <div class="form-row">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-row">
+            <label for="phone">Phone (optional)</label>
+            <input id="phone" name="phone" type="tel" placeholder="e.g. 04XX XXX XXX" pattern="[0-9 +()-]*">
+          </div>
+          <div class="form-row">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject" required>
+              <option value="">Please choose…</option>
+              <option>Physics</option>
+              <option>Chemistry</option>
+              <option>Biology</option>
+              <option>Mathematics Advanced</option>
+              <option>Mathematics Extension 1</option>
+              <option>Mathematics Extension 2</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="mode">Preferred mode</label>
+            <select id="mode" name="mode">
+              <option>Online</option>
+              <option>Face‑to‑face</option>
+              <option>Either</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="message">How can we help?</label>
+            <textarea id="message" name="message" rows="5" placeholder="Tell us about your goals, topics, or preferred times" required></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Send message</button>
+        </form>
+
+        <p class="muted mt-8">Having trouble? Email us directly: <a href="mailto:INSERT EMAIL HERE">INSERT EMAIL HERE</a></p>
+      </article>
+
+      <article class="card">
+        <h2>Details</h2>
+        <ul class="contact-details">
+          <li>Email: <a href="mailto:INSERT EMAIL HERE">INSERT EMAIL HERE</a></li>
+          <li>Location: NSW (online and face‑to‑face)</li>
+          <li>Hours: After school and weekends by arrangement</li>
+        </ul>
+
+        <h3 class="mt-16">What happens next?</h3>
+        <ol>
+          <li>We’ll get back to you to organise a free 15‑minute chat.</li>
+          <li>We design a plan around your goals and timetable.</li>
+          <li>We begin with a structured first lesson and resources.</li>
+        </ol>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <h3>Jason's Tutoring</h3>
+        <p>Email: <a href="mailto:INSERT EMAIL HERE">INSERT EMAIL HERE</a></p>
+      </div>
+      <div>
+        <h4>Quick links</h4>
+        <ul class="footer-links">
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="tutors.html">Tutors</a></li>
+          <li><a href="resources.html">Resources</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="copyright">© <span id="year"></span> Jason's Tutoring.</p>
+  </footer>
+  <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>

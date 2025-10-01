@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tutors | Jason's Tutoring</title>
+  <meta name="description" content="Meet the tutors for Physics, Chemistry, Biology, Mathematics Advanced, Extension 1 and Extension 2." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Jason's Tutoring</a>
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="primary-menu">☰</button>
+        <ul id="primary-menu" class="menu">
+          <li><a href="index.html" data-nav>Home</a></li>
+          <li><a href="subjects.html" data-nav>Subjects</a></li>
+          <li><a href="tutors.html" data-nav class="active">Tutors</a></li>
+          <li><a href="resources.html" data-nav>Resources</a></li>
+          <li><a href="contact.html" class="btn btn-primary" data-nav>Contact</a></li>
+        </ul>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-header">
+      <h1>Our Tutors</h1>
+      <p>Upload tutor photos into assets/images/tutors/ and replace the filenames below.</p>
+    </section>
+
+    <section class="grid grid-3 tutor-grid">
+      <!-- Tutor Card Template -->
+      <article class="card tutor-card" data-tutor='{"name":"Jason Nguyen","subjects":"Physics, Mathematics Advanced, Extension 1","bio":"HSC Physics and Maths specialist with 8+ years’ experience. Focus on clear problem‑solving frameworks and past paper mastery.","image":"assets/images/tutors/jason.jpg"}'>
+        <img src="assets/images/tutors/jason.jpg" alt="Photo of Jason Nguyen" onerror="this.src='assets/images/tutors/placeholder.jpg'">
+        <h3>Jason Nguyen</h3>
+        <p class="muted">Physics • Maths Advanced • Ext 1</p>
+        <button class="btn btn-outline" data-profile>View profile</button>
+      </article>
+
+      <article class="card tutor-card" data-tutor='{"name":"Amelia Chen","subjects":"Chemistry, Biology","bio":"Explains complex ideas simply with structured notes and practical exam strategies.","image":"assets/images/tutors/amelia.jpg"}'>
+        <img src="assets/images/tutors/amelia.jpg" alt="Photo of Amelia Chen" onerror="this.src='assets/images/tutors/placeholder.jpg'">
+        <h3>Amelia Chen</h3>
+        <p class="muted">Chemistry • Biology</p>
+        <button class="btn btn-outline" data-profile>View profile</button>
+      </article>
+
+      <article class="card tutor-card" data-tutor='{"name":"Samir Patel","subjects":"Mathematics Extension 1, Extension 2","bio":"Loves turning challenging problems into approachable steps. Focus on proof and technique.","image":"assets/images/tutors/samir.jpg"}'>
+        <img src="assets/images/tutors/samir.jpg" alt="Photo of Samir Patel" onerror="this.src='assets/images/tutors/placeholder.jpg'">
+        <h3>Samir Patel</h3>
+        <p class="muted">Maths Ext 1 • Ext 2</p>
+        <button class="btn btn-outline" data-profile>View profile</button>
+      </article>
+
+      <!-- Add more tutor cards as needed; duplicate the structure above -->
+      <article class="card tutor-card" data-tutor='{"name":"Your Tutor Name","subjects":"Subject(s)","bio":"Short bio here. Add qualifications, years of experience, and teaching approach.","image":"assets/images/tutors/your-tutor.jpg"}'>
+        <img src="assets/images/tutors/your-tutor.jpg" alt="Photo of Your Tutor" onerror="this.src='assets/images/tutors/placeholder.jpg'">
+        <h3>Your Tutor Name</h3>
+        <p class="muted">Subjects</p>
+        <button class="btn btn-outline" data-profile>View profile</button>
+      </article>
+    </section>
+
+    <p class="center mt-24"><a class="btn btn-primary" href="contact.html">Book a lesson</a></p>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="tutorModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <button class="modal-close" data-close aria-label="Close">×</button>
+      <div class="modal-body">
+        <img id="modalImg" src="" alt="" />
+        <h3 id="modalName"></h3>
+        <p class="muted" id="modalSubjects"></p>
+        <p id="modalBio"></p>
+        <a class="btn btn-primary" href="contact.html">Enquire about lessons</a>
+      </div>
+    </div>
+    <div class="modal-backdrop" data-close></div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <h3>Jason's Tutoring</h3>
+        <p>Email: <a href="mailto:INSERT EMAIL HERE">INSERT EMAIL HERE</a></p>
+      </div>
+      <div>
+        <h4>Quick links</h4>
+        <ul class="footer-links">
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="copyright">© <span id="year"></span> Jason's Tutoring.</p>
+  </footer>
+  <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>

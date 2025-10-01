@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resources | Jason's Tutoring</title>
+  <meta name="description" content="Free HSC resources: notes, planners, and interactive tools for Physics, Chemistry, Biology, and Maths." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Jason's Tutoring</a>
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="primary-menu">☰</button>
+        <ul id="primary-menu" class="menu">
+          <li><a href="index.html" data-nav>Home</a></li>
+          <li><a href="subjects.html" data-nav>Subjects</a></li>
+          <li><a href="tutors.html" data-nav>Tutors</a></li>
+          <li><a href="resources.html" data-nav class="active">Resources</a></li>
+          <li><a href="contact.html" class="btn btn-primary" data-nav>Contact</a></li>
+        </ul>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-header">
+      <h1>Resources</h1>
+      <p>Download notes, plan your study, and practise smarter.</p>
+    </section>
+
+    <section class="card">
+      <h2>Study planner generator</h2>
+      <p>Enter your weekly study time and select subjects to generate a balanced plan.</p>
+      <form id="plannerForm" class="grid grid-3 gap-12">
+        <div>
+          <label for="hours">Hours per week</label>
+          <input id="hours" type="number" min="1" max="60" placeholder="e.g. 10" required>
+        </div>
+        <div>
+          <label>Subjects</label>
+          <div class="checkboxes">
+            <label><input type="checkbox" value="Physics" checked> Physics</label>
+            <label><input type="checkbox" value="Chemistry" checked> Chemistry</label>
+            <label><input type="checkbox" value="Biology"> Biology</label>
+            <label><input type="checkbox" value="Mathematics Advanced" checked> Maths Advanced</label>
+            <label><input type="checkbox" value="Mathematics Extension 1"> Maths Ext 1</label>
+            <label><input type="checkbox" value="Mathematics Extension 2"> Maths Ext 2</label>
+          </div>
+        </div>
+        <div class="align-end">
+          <button class="btn btn-primary" type="submit">Generate plan</button>
+        </div>
+      </form>
+      <div id="plannerOutput" class="mt-16"></div>
+    </section>
+
+    <section class="grid grid-2 mt-24">
+      <article class="card">
+        <h2>Notes and worksheets</h2>
+        <ul class="resource-list">
+          <li>HSC Physics formula sheet (PDF) — coming soon</li>
+          <li>Maths Advanced practice set (PDF) — coming soon</li>
+          <li>Chemistry structured responses (PDF) — coming soon</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>FAQs</h2>
+        <details>
+          <summary>Do you tutor both Year 11 and Year 12?</summary>
+          <p>Yes — we support both Preliminary and HSC courses.</p>
+        </details>
+        <details>
+          <summary>Can I choose online or face‑to‑face?</summary>
+          <p>Absolutely. We can schedule sessions to suit your preference.</p>
+        </details>
+        <details>
+          <summary>Do you provide practice exams?</summary>
+          <p>Yes. We curate past papers and provide targeted question sets for each topic.</p>
+        </details>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <h3>Jason's Tutoring</h3>
+        <p>Email: <a href="mailto:INSERT EMAIL HERE">INSERT EMAIL HERE</a></p>
+      </div>
+      <div>
+        <h4>Quick links</h4>
+        <ul class="footer-links">
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="tutors.html">Tutors</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="copyright">© <span id="year"></span> Jason's Tutoring.</p>
+  </footer>
+  <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>

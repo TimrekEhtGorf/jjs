@@ -1,27 +1,35 @@
 (function(){
   const $ = (sel, ctx=document) => ctx.querySelector(sel);
   const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Year in footer
   const yearEl = $('#year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Mobile nav toggle
+  // Mobile nav toggle (animated)
   const navToggle = $('.nav-toggle');
   const menu = $('#primary-menu');
   if (navToggle && menu){
     navToggle.addEventListener('click', () => {
       const expanded = navToggle.getAttribute('aria-expanded') === 'true';
       navToggle.setAttribute('aria-expanded', String(!expanded));
-      menu.style.display = expanded ? 'none' : 'flex';
+      menu.classList.toggle('open', !expanded);
     });
     // Close menu on link click (mobile)
     $$('#primary-menu a').forEach(a => a.addEventListener('click', () => {
       if (window.innerWidth <= 600) {
         navToggle.setAttribute('aria-expanded', 'false');
-        menu.style.display = 'none';
+        menu.classList.remove('open');
       }
     }));
+    // Reset state on resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 600) {
+        menu.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
   }
 
   // Theme toggle
@@ -42,14 +50,16 @@
   // Back to top
   const backToTop = $('#backToTop');
   if (backToTop){
-    window.addEventListener('scroll', () => {
+    const onScroll = () => {
       if (window.scrollY > 500) backToTop.classList.add('show');
       else backToTop.classList.remove('show');
-    });
+    };
+    window.addEventListener('scroll', onScroll, { passive:true });
     backToTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+    onScroll();
   }
 
-  // Typed words on homepage
+  // Typed words on homepage (reduce motion friendly)
   const typedEl = $('#typedWords');
   if (typedEl){
     const words = [
@@ -60,33 +70,50 @@
       'Mathematics Extension 1',
       'Mathematics Extension 2'
     ];
-    let i=0, j=0, deleting=false;
-    function tick(){
-      const word = words[i];
-      typedEl.textContent = word.slice(0, j);
-      if (!deleting && j < word.length){ j++; }
-      else if (deleting && j > 0){ j--; }
-      else {
-        if (!deleting){ deleting = true; setTimeout(tick, 1200); return; }
-        deleting = false; i = (i+1) % words.length;
+    if (reduceMotion){
+      typedEl.textContent = words[0];
+    } else {
+      let i=0, j=0, deleting=false;
+      function tick(){
+        const word = words[i];
+        typedEl.textContent = word.slice(0, j);
+        if (!deleting && j < word.length){ j++; }
+        else if (deleting && j > 0){ j--; }
+        else {
+          if (!deleting){ deleting = true; setTimeout(tick, 1200); return; }
+          deleting = false; i = (i+1) % words.length;
+        }
+        setTimeout(tick, deleting ? 35 : 70);
       }
-      setTimeout(tick, deleting ? 35 : 70);
+      tick();
     }
-    tick();
   }
 
-  // Testimonials slider
+  // Testimonials slider with smooth height transitions
   const slider = $('#testimonialSlider');
   if (slider){
+    const slidesWrap = $('.slides', slider);
     const slides = $$('.slide', slider);
-    let idx = 0;
+    let idx = slides.findIndex(s => s.classList.contains('current'));
+    if (idx < 0) idx = 0;
+
     const show = n => {
       slides.forEach(s => s.classList.remove('current'));
       slides[n].classList.add('current');
+      if (slidesWrap) slidesWrap.style.height = slides[n].offsetHeight + 'px';
     };
-    $('[data-prev]', slider).addEventListener('click', () => { idx = (idx-1+slides.length)%slides.length; show(idx); });
-    $('[data-next]', slider).addEventListener('click', () => { idx = (idx+1)%slides.length; show(idx); });
-    setInterval(() => { idx = (idx+1)%slides.length; show(idx); }, 6000);
+
+    // Init height
+    const initHeight = () => { if (slidesWrap) slidesWrap.style.height = slides[idx].offsetHeight + 'px'; };
+    window.addEventListener('load', initHeight);
+    initHeight();
+
+    const prevBtn = $('[data-prev]', slider);
+    const nextBtn = $('[data-next]', slider);
+    prevBtn.addEventListener('click', () => { idx = (idx-1+slides.length)%slides.length; show(idx); });
+    nextBtn.addEventListener('click', () => { idx = (idx+1)%slides.length; show(idx); });
+    if (!reduceMotion) setInterval(() => { idx = (idx+1)%slides.length; show(idx); }, 6000);
+    window.addEventListener('resize', initHeight);
   }
 
   // Subjects filter
@@ -167,7 +194,7 @@
       }
       const rows = allocation.map(a => `<tr><td>${a.subject}</td><td>${a.hours} hr${a.hours>1?'s':''}</td></tr>`).join('');
       plannerOutput.innerHTML = `
-        <div class="card">
+        <div class="card reveal zoom-in">
           <h3>Your weekly plan (${hours} hr${hours>1?'s':''})</h3>
           <table class="plan-table">
             <thead><tr><th>Subject</th><th>Time</th></tr></thead>
@@ -176,7 +203,101 @@
           <p class="muted">Tip: Break each hour into 45 mins focused study + 15 mins review.</p>
         </div>
       `;
+      // Trigger reveal immediately for newly injected content
+      if (!reduceMotion) requestAnimationFrame(() => document.querySelector('.plan-table')?.closest('.reveal')?.classList.add('in'));
     });
+  }
+
+  // Button ripple effect
+  $$('.btn').forEach(btn => {
+    btn.addEventListener('pointerdown', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX || (rect.left + rect.width/2)) - rect.left;
+      const y = (e.clientY || (rect.top + rect.height/2)) - rect.top;
+      btn.style.setProperty('--rx', x + 'px');
+      btn.style.setProperty('--ry', y + 'px');
+      btn.classList.remove('rippling');
+      // restart animation
+      void btn.offsetWidth; 
+      btn.classList.add('rippling');
+      setTimeout(() => btn.classList.remove('rippling'), 650);
+    });
+  });
+
+  // 3D Tilt on cards (desktop only)
+  if (!reduceMotion && window.matchMedia('(pointer:fine)').matches){
+    const maxTilt = 8; // degrees
+    $$('.card').forEach(card => {
+      let raf;
+      const onMove = (e) => {
+        const r = card.getBoundingClientRect();
+        const mx = (e.clientX - r.left) / r.width;   // 0..1
+        const my = (e.clientY - r.top) / r.height;  // 0..1
+        const tiltY = (mx - 0.5) * (maxTilt*2);     // left/right
+        const tiltX = (0.5 - my) * (maxTilt*2);     // up/down
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          card.style.setProperty('--tiltX', tiltX.toFixed(2) + 'deg');
+          card.style.setProperty('--tiltY', tiltY.toFixed(2) + 'deg');
+        });
+      };
+      card.addEventListener('mousemove', onMove);
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--tiltX', '0deg');
+        card.style.setProperty('--tiltY', '0deg');
+      });
+    });
+  }
+
+  // Hero parallax
+  const hero = $('.hero');
+  const heroArt = $('.hero-art');
+  if (hero && heroArt && !reduceMotion && window.matchMedia('(pointer:fine)').matches){
+    let raf;
+    hero.addEventListener('mousemove', (e) => {
+      const r = hero.getBoundingClientRect();
+      const mx = (e.clientX - r.left) / r.width - 0.5;
+      const my = (e.clientY - r.top) / r.height - 0.5;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const tx = mx * 20; // px
+        const ty = my * 12; // px
+        heroArt.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+      });
+    });
+    hero.addEventListener('mouseleave', () => { heroArt.style.transform = 'none'; });
+  }
+
+  // Scroll reveal (auto-applied to common elements, can also add .reveal manually in HTML)
+  function addRevealList(selector, effect, offset=0){
+    $$(selector).forEach((el, i) => {
+      if (!el.classList.contains('reveal')) el.classList.add('reveal');
+      if (effect) el.classList.add(effect);
+      el.style.setProperty('--d', (offset + i).toString());
+    });
+  }
+  addRevealList('.page-header', 'fade-left', 0);
+  addRevealList('.feature-cards .card', '', 0);
+  addRevealList('.subjects-highlight .subject-chip', 'fade-right', 0);
+  addRevealList('.subject-grid .subject-card', '', 0);
+  addRevealList('.tutor-grid .tutor-card', '', 0);
+  addRevealList('.resource-list li', '', 0);
+  addRevealList('.contact-form .form-row', 'blur-in', 0);
+  addRevealList('.cta-inner', 'zoom-in', 0);
+  // Hero copy children
+  $$('.hero-copy > *').forEach((el, i) => { el.classList.add('reveal','fade-right'); el.style.setProperty('--d', i.toString()); });
+
+  if (reduceMotion){
+    // If user prefers reduced motion, show all immediately
+    $$('.reveal').forEach(el => el.classList.add('in'));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('in');
+        else entry.target.classList.remove('in');
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
+    $$('.reveal').forEach(el => io.observe(el));
   }
 
 })();
